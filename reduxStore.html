@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>redux store implementation</title>
+</head>
+
+<body>
+    <div>
+        Random Count: <span id="count"></span>
+    </div>
+    <button id="button">Click Me!</button>
+    <script>
+        const counterNode = document.getElementById("count");
+        let button = document.getElementById("button");
+        const createStore = (reducer, initialState) => {
+            const store = {};
+            store.state = initialState;
+
+
+            store.listeners = [];
+            store.getState = () => store.state;
+
+            store.subscribe = (listener) => {
+                store.listeners.push(listener)
+            };
+
+            store.dispatch = (action) => {
+                store.state = reducer(store.state, action);
+                store.listeners.forEach(listener => listener());
+            }
+
+            return store;
+        };
+
+        let initialState = {
+            count: 0
+        }
+        const reducer = (prevState = initialState, action) => {
+            switch (action.type) {
+                case "ADD":
+                    return { ...prevState, count: prevState.count + action.amount };
+                default:
+                    return prevState;
+            }
+        };
+        let store = createStore(reducer);
+        store.dispatch({});
+
+        store.subscribe(() => {
+            const state = store.getState();
+            const count = state.count;
+            counterNode.innerHTML = count;
+        })
+
+        button.addEventListener("click", () => {
+            console.log('----- Previous state', store.getState());
+            store.dispatch({
+                type: "ADD",
+                amount: 10
+            })
+            console.log('----- new state', store.getState());
+        })
+
+    </script>
+</body>
+
+</html>
